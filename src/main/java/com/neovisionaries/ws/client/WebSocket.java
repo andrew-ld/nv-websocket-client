@@ -2738,7 +2738,12 @@ public class WebSocket
      * @return
      *         {@code this} object.
      */
-    public boolean sendFrame(WebSocketFrame frame)
+    public WebSocket sendFrame(WebSocketFrame frame) {
+    	sendFrameChecked(frame);
+    	return this;
+    }
+     
+    public boolean sendFrameChecked(WebSocketFrame frame)
     {
         if (frame == null)
         {
