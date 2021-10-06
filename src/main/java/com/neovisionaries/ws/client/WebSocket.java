@@ -2738,11 +2738,11 @@ public class WebSocket
      * @return
      *         {@code this} object.
      */
-    public WebSocket sendFrame(WebSocketFrame frame)
+    public boolean sendFrame(WebSocketFrame frame)
     {
         if (frame == null)
         {
-            return this;
+            return false;
         }
 
         synchronized (mStateManager)
@@ -2751,7 +2751,7 @@ public class WebSocket
 
             if (state != OPEN && state != CLOSING)
             {
-                return this;
+                return false;
             }
         }
 
@@ -2769,7 +2769,7 @@ public class WebSocket
         if (wt == null)
         {
             // An instance of WritingThread is not available.
-            return this;
+            return false;
         }
 
         // Split the frame into multiple frames if necessary.
@@ -2782,18 +2782,24 @@ public class WebSocket
         if (frames == null)
         {
             // Queue the frame.
-            wt.queueFrame(frame);
+            if (!wt.queueFrame(frame)) 
+            {
+            	return false;
+            }
         }
         else
         {
             for (WebSocketFrame f : frames)
             {
                 // Queue the frame.
-                wt.queueFrame(f);
+                if (!wt.queueFrame(f))
+                {
+		    return false;
+                }
             }
         }
 
-        return this;
+        return true;
     }
 
 
