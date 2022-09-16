@@ -49,14 +49,17 @@ class SocketConnector
     private int mDualStackFallbackDelay = 250;
     private boolean mVerifyHostname;
     private Socket mSocket;
+    private final ListenerManager mListenManager;
 
-    SocketConnector(SocketFactory socketFactory, Address address, int timeout, String[] serverNames, int socketTimeout)
+    SocketConnector(ListenerManager listenerManager,
+                    SocketFactory socketFactory, Address address, int timeout, String[] serverNames, int socketTimeout)
     {
-        this(socketFactory, address, timeout, socketTimeout, serverNames, null, null, null, 0);
+        this(listenerManager, socketFactory, address, timeout, socketTimeout, serverNames, null, null, null, 0);
     }
 
 
     SocketConnector(
+            ListenerManager listenerManager,
             SocketFactory socketFactory, Address address, int timeout, int socketTimeout, String[] serverNames,
             ProxyHandshaker handshaker, SSLSocketFactory sslSocketFactory,
             String host, int port)
@@ -70,6 +73,7 @@ class SocketConnector
         mSSLSocketFactory  = sslSocketFactory;
         mHost              = host;
         mPort              = port;
+        mListenManager     = listenerManager;
     }
 
 
@@ -101,6 +105,7 @@ class SocketConnector
     {
         // Create socket initiator.
         SocketInitiator socketInitiator = new SocketInitiator(
+                mListenManager,
                 mSocketFactory, mAddress, mConnectionTimeout, mServerNames,
                 mDualStackMode, mDualStackFallbackDelay);
 

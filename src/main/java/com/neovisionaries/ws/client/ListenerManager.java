@@ -23,18 +23,19 @@ import java.util.Map;
 
 class ListenerManager
 {
-    private final WebSocket mWebSocket;
+    private WebSocket mWebSocket;
     private final List<WebSocketListener> mListeners = new ArrayList<WebSocketListener>();
 
     private boolean mSyncNeeded = true;
     private List<WebSocketListener> mCopiedListeners;
 
+    synchronized public void callOnWebSocket(WebSocket webSocket) {
+        if (mWebSocket != null) {
+            throw new IllegalStateException("websocket already received");
+        }
 
-    public ListenerManager(WebSocket websocket)
-    {
-        mWebSocket = websocket;
+        mWebSocket = webSocket;
     }
-
 
     public List<WebSocketListener> getListeners()
     {

@@ -84,9 +84,11 @@ public class SocketInitiator {
         private final int mConnectTimeout;
         private final Signal mStartSignal;
         private final Signal mDoneSignal;
+        private final ListenerManager mListenManager;
 
 
         SocketRacer(
+                ListenerManager listenerManager,
                 SocketFuture future, SocketFactory socketFactory, SocketAddress socketAddress,
                 String[] serverNames, int connectTimeout, Signal startSignal, Signal doneSignal)
         {
@@ -97,10 +99,13 @@ public class SocketInitiator {
             mConnectTimeout = connectTimeout;
             mStartSignal    = startSignal;
             mDoneSignal     = doneSignal;
+            mListenManager  = listenerManager;
         }
 
 
         public void run() {
+            mListenManager.callOnThreadStarted(ThreadType.CONNECT_THREAD, this);
+
             Socket socket = null;
             try
             {
@@ -143,6 +148,8 @@ public class SocketInitiator {
                         // ignored
                     }
                 }
+            } finally {
+                mListenManager.callOnThreadStopping(ThreadType.CONNECT_THREAD, this);
             }
         }
 
@@ -316,9 +323,11 @@ public class SocketInitiator {
     private final String[] mServerNames;
     private final DualStackMode mMode;
     private final int mFallbackDelay;
+    private final ListenerManager mListenManager;
 
 
     public SocketInitiator(
+            ListenerManager listenManager,
             SocketFactory socketFactory, Address address, int connectTimeout, String[] serverNames,
             DualStackMode mode, int fallbackDelay)
     {
@@ -328,6 +337,7 @@ public class SocketInitiator {
         mServerNames    = serverNames;
         mMode           = mode;
         mFallbackDelay  = fallbackDelay;
+        mListenManager  = listenManager;
     }
 
 
@@ -358,6 +368,7 @@ public class SocketInitiator {
             // Create racer to establish the socket.
             SocketAddress socketAddress = new InetSocketAddress(address, mAddress.getPort());
             SocketRacer racer = new SocketRacer(
+                    mListenManager,
                     future, mSocketFactory, socketAddress, mServerNames, mConnectTimeout,
                     startSignal, doneSignal);
             racers.add(racer);

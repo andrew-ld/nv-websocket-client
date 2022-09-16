@@ -39,6 +39,7 @@ public class WebSocketFactory
     private int mDualStackFallbackDelay = 250;
     private boolean mVerifyHostname = true;
     private String[] mServerNames;
+    private final ListenerManager mListenerManager = new ListenerManager();
 
 
     /**
@@ -893,6 +894,7 @@ public class WebSocketFactory
 
         // Create an instance that will execute the task to connect to the server later.
         return new SocketConnector(
+                mListenerManager,
                 factory, address, timeout, mSocketTimeout, mProxySettings.getServerNames(), handshaker,
                 sslSocketFactory, host, port)
                 .setDualStackSettings(mDualStackMode, mDualStackFallbackDelay)
@@ -909,7 +911,7 @@ public class WebSocketFactory
         Address address = new Address(host, port);
 
         // Create an instance that will execute the task to connect to the server later.
-        return new SocketConnector(factory, address, timeout, mServerNames, mSocketTimeout)
+        return new SocketConnector(mListenerManager, factory, address, timeout, mServerNames, mSocketTimeout)
                 .setDualStackSettings(mDualStackMode, mDualStackFallbackDelay)
                 .setVerifyHostname(mVerifyHostname);
     }
@@ -949,6 +951,6 @@ public class WebSocketFactory
             path = path + "?" + query;
         }
 
-        return new WebSocket(this, secure, userInfo, host, path, connector);
+        return new WebSocket(this, secure, userInfo, host, path, connector, mListenerManager);
     }
 }

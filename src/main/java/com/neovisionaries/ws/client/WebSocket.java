@@ -1136,15 +1136,17 @@ public class WebSocket
 
 
     WebSocket(WebSocketFactory factory, boolean secure, String userInfo,
-            String host, String path, SocketConnector connector)
+            String host, String path, SocketConnector connector, ListenerManager listenerManager)
     {
         mWebSocketFactory  = factory;
         mSocketConnector   = connector;
+        mListenerManager   = listenerManager;
         mStateManager      = new StateManager();
         mHandshakeBuilder  = new HandshakeBuilder(secure, userInfo, host, path);
-        mListenerManager   = new ListenerManager(this);
         mPingSender        = new PingSender(this, new CounterPayloadGenerator());
         mPongSender        = new PongSender(this, new CounterPayloadGenerator());
+
+        listenerManager.callOnWebSocket(this);
     }
 
 
