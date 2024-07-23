@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import javax.net.SocketFactory;
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -48,6 +49,7 @@ class SocketConnector
     private DualStackMode mDualStackMode = DualStackMode.BOTH;
     private int mDualStackFallbackDelay = 250;
     private boolean mVerifyHostname;
+    private HostnameVerifier mHostnameVerifier = OkHostnameVerifier.INSTANCE;
     private Socket mSocket;
     private final ListenerManager mListenManager;
 
@@ -216,6 +218,15 @@ class SocketConnector
         }
     }
 
+    SocketConnector setHostnameVerifier(HostnameVerifier verifier) {
+        if (verifier == null) {
+            mHostnameVerifier = OkHostnameVerifier.INSTANCE;
+        } else {
+            mHostnameVerifier = verifier;
+        }
+
+        return this;
+    }
 
     SocketConnector setDualStackSettings(DualStackMode mode, int fallbackDelay)
     {
@@ -292,8 +303,7 @@ class SocketConnector
             return;
         }
 
-        // Hostname verifier.
-        OkHostnameVerifier verifier = OkHostnameVerifier.INSTANCE;
+        HostnameVerifier verifier = mHostnameVerifier;
 
         // The SSL session.
         SSLSession session = socket.getSession();

@@ -22,6 +22,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import javax.net.SocketFactory;
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 
@@ -40,6 +41,7 @@ public class WebSocketFactory
     private boolean mVerifyHostname = true;
     private String[] mServerNames;
     private final ListenerManager mListenerManager = new ListenerManager();
+    private HostnameVerifier mHostnameVerifier;
 
 
     /**
@@ -112,6 +114,12 @@ public class WebSocketFactory
     public WebSocketFactory setSocketFactory(SocketFactory factory)
     {
         mSocketFactorySettings.setSocketFactory(factory);
+
+        return this;
+    }
+
+    public WebSocketFactory setHostnameVerifier(HostnameVerifier verifier) {
+        mHostnameVerifier = verifier;
 
         return this;
     }
@@ -898,7 +906,8 @@ public class WebSocketFactory
                 factory, address, timeout, mSocketTimeout, mProxySettings.getServerNames(), handshaker,
                 sslSocketFactory, host, port)
                 .setDualStackSettings(mDualStackMode, mDualStackFallbackDelay)
-                .setVerifyHostname(mVerifyHostname);
+                .setVerifyHostname(mVerifyHostname)
+                .setHostnameVerifier(mHostnameVerifier);
     }
 
 
@@ -913,7 +922,8 @@ public class WebSocketFactory
         // Create an instance that will execute the task to connect to the server later.
         return new SocketConnector(mListenerManager, factory, address, timeout, mServerNames, mSocketTimeout)
                 .setDualStackSettings(mDualStackMode, mDualStackFallbackDelay)
-                .setVerifyHostname(mVerifyHostname);
+                .setVerifyHostname(mVerifyHostname)
+                .setHostnameVerifier(mHostnameVerifier);
     }
 
 
