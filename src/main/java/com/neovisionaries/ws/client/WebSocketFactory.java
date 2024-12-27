@@ -42,6 +42,7 @@ public class WebSocketFactory
     private String[] mServerNames;
     private final ListenerManager mListenerManager = new ListenerManager();
     private HostnameVerifier mHostnameVerifier;
+    private IDns mDns;
 
 
     /**
@@ -87,6 +88,10 @@ public class WebSocketFactory
         }
     }
 
+    public WebSocketFactory setDns(IDns dns) {
+        mDns = dns;
+        return this;
+    }
 
     /**
      * Get the socket factory that has been set by {@link
@@ -904,7 +909,7 @@ public class WebSocketFactory
         return new SocketConnector(
                 mListenerManager,
                 factory, address, timeout, mSocketTimeout, mProxySettings.getServerNames(), handshaker,
-                sslSocketFactory, host, port)
+                sslSocketFactory, host, port, mDns)
                 .setDualStackSettings(mDualStackMode, mDualStackFallbackDelay)
                 .setVerifyHostname(mVerifyHostname)
                 .setHostnameVerifier(mHostnameVerifier);
@@ -920,7 +925,7 @@ public class WebSocketFactory
         Address address = new Address(host, port);
 
         // Create an instance that will execute the task to connect to the server later.
-        return new SocketConnector(mListenerManager, factory, address, timeout, mServerNames, mSocketTimeout)
+        return new SocketConnector(mListenerManager, factory, address, timeout, mServerNames, mSocketTimeout, mDns)
                 .setDualStackSettings(mDualStackMode, mDualStackFallbackDelay)
                 .setVerifyHostname(mVerifyHostname)
                 .setHostnameVerifier(mHostnameVerifier);

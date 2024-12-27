@@ -37,6 +37,7 @@ import javax.net.ssl.SSLSocketFactory;
  */
 class SocketConnector
 {
+    private final IDns mDns;
     private final SocketFactory mSocketFactory;
     private final Address mAddress;
     private final int mConnectionTimeout;
@@ -54,9 +55,9 @@ class SocketConnector
     private final ListenerManager mListenManager;
 
     SocketConnector(ListenerManager listenerManager,
-                    SocketFactory socketFactory, Address address, int timeout, String[] serverNames, int socketTimeout)
+                    SocketFactory socketFactory, Address address, int timeout, String[] serverNames, int socketTimeout, IDns dns)
     {
-        this(listenerManager, socketFactory, address, timeout, socketTimeout, serverNames, null, null, null, 0);
+        this(listenerManager, socketFactory, address, timeout, socketTimeout, serverNames, null, null, null, 0, dns);
     }
 
 
@@ -64,7 +65,7 @@ class SocketConnector
             ListenerManager listenerManager,
             SocketFactory socketFactory, Address address, int timeout, int socketTimeout, String[] serverNames,
             ProxyHandshaker handshaker, SSLSocketFactory sslSocketFactory,
-            String host, int port)
+            String host, int port, IDns dns)
     {
         mSocketFactory     = socketFactory;
         mAddress           = address;
@@ -76,6 +77,7 @@ class SocketConnector
         mHost              = host;
         mPort              = port;
         mListenManager     = listenerManager;
+        mDns               = dns;
     }
 
 
@@ -143,7 +145,11 @@ class SocketConnector
         try
         {
             // Resolve hostname to IP addresses.
-            addresses = InetAddress.getAllByName(mAddress.getHostname());
+            if (mDns == null) {
+                addresses = InetAddress.getAllByName(mAddress.getHostname());
+            } else {
+                addresses = mDns.resolve(mAddress.getHostname());
+            }
 
             // Sort addresses: IPv6 first, then IPv4.
             Arrays.sort(addresses, new Comparator<InetAddress>() {
